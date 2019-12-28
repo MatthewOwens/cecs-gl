@@ -1,7 +1,7 @@
 TARGET = game
 TEST_TARGET = check
 
-LIBS = -lm -DREENTRANT -std=c11 -Lcecs/ -lcecs
+LIBS = -lm -D_REENTRANT -std=c11 -Lcecs/ -lcecs -lGL -lGLEW -lSDL2 -lSDL2_image
 TEST_LIBS = $(LIBS) `pkg-config --libs check`
 
 CC = gcc
