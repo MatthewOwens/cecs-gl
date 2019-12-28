@@ -26,7 +26,7 @@ all: $(TARGET) $(TEST_TARGET)
 
 ## cecs: builds the cecs submodule
 cecs:
-	$(MAKE) -C cecs 
+	$(MAKE) -C cecs libcecs.a
 
 ## game: builds the game and cecs submodule
 $(TARGET): cecs $(ALL_OBJECTS)
