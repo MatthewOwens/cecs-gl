@@ -7,13 +7,11 @@ TEST_LIBS = $(LIBS) `pkg-config --libs check`
 CC = gcc
 CFLAGS = -g -Wall -Isrc/
 
-.PHONY: default all clean cecs FORCE output
+.PHONY: default all clean cecs FORCE output help
 .PRECIOUS: $(TARGET) $(TEST_TARGET)
 
 default: all
-all: $(TARGET) $(TEST_TARGET)
 
-#OBJECTS = $(patsubst src/%.c, src/%.o, $(wildcard src/**/*.c))
 ALL_OBJECTS = $(patsubst src/%.c, src/%.o, $(wildcard src/*.c))
 OBJECTS = $(filter-out src/main.o, $(ALL_OBJECTS))
 HEADERS = $(wildcard src/*.h) $(wildcard src/**/*.h)
@@ -23,13 +21,20 @@ TEST_OBJECTS = $(patsubst tests/%.c, tests/%.o, $(wildcard tests/*.c))
 TEST_HEADERS = $(wildcard tests/*.h) $(wildcard tests/**/*.h)
 TEST_SRCS = $(wildcard tests/*.c) $(wildcard tests/**/*.c)
 
+## all: builds the game, cecs submodule & tests
+all: $(TARGET) $(TEST_TARGET)
+
+## cecs: builds the cecs submodule
 cecs:
 	$(MAKE) -C cecs 
 
+## game: builds the game and cecs submodule
 $(TARGET): cecs $(ALL_OBJECTS)
 	@echo "========== Building $(TARGET) =========="
 	$(CC) $(CFLAGS) $(ALL_OBJECTS) $(LIBS) -o $@
 
+## check: builds and runs the tests.
+##        requires that game .o files (except main) & cecs submodule are built
 $(TEST_TARGET): cecs $(OBJECTS) $(TEST_OBJECTS) FORCE
 	@echo "========== Building $(TEST_TARGET) =========="
 	$(CC) $(TEST_CFLAGS) $(OBJECTS) $(TEST_OBJECTS) $(TEST_LIBS) -o $@
@@ -43,12 +48,15 @@ src/%.o: src/%.c
 tests/%o: tests/%.c
 	$(CC) $(TEST_CFLAGS) -c $^ -o $@
 
+## clean: removes all .o files, binaries for game & cecs submodule
 clean:
 	rm -f src/*.o
 	rm -f tests/*.o
 	rm -f $(TARGET)
 	rm -f $(TEST_TARGET)
+	$(MAKE) -C cecs clean
 
+## output: prints the variables used in the makefile & their values
 output:
 	@echo "==== $(TARGET) ===="
 	@echo "sources: $(SRCS)"
@@ -58,5 +66,9 @@ output:
 	@echo "sources: $(TEST_SRCS)"
 	@echo "headers: $(TEST_HEADERS)"
 	@echo "objects: $(TEST_OBJECTS)"
+
+## help: prints this message
+help: Makefile
+	@sed -n 's/^##//p' $<
 
 FORCE:
